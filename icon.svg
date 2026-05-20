@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#0f0f14"/>
+  <rect x="60" y="60" width="392" height="392" rx="80" fill="#1a1a2e"/>
+  <!-- Lettre L stylisée avec serif élégant -->
+  <text x="256" y="340" font-family="Georgia, serif" font-size="280" font-weight="700"
+        text-anchor="middle" fill="url(#grad)" letter-spacing="-10">L</text>
+  <!-- Accent circonflexe stylisé au-dessus -->
+  <path d="M 196 90 L 256 50 L 316 90" stroke="url(#accent)" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Petites lignes de texte symboliques -->
+  <rect x="310" y="290" width="70" height="6" rx="3" fill="#4a9eff" opacity="0.6"/>
+  <rect x="310" y="308" width="50" height="6" rx="3" fill="#4a9eff" opacity="0.4"/>
+  <rect x="310" y="326" width="60" height="6" rx="3" fill="#4a9eff" opacity="0.3"/>
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6eb5ff"/>
+      <stop offset="100%" stop-color="#4a9eff"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#6eb5ff"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+  </defs>
+</svg>
