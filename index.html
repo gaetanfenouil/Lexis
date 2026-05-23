@@ -1281,11 +1281,14 @@ function renderSettings(){
       <button class="toggle${langCfg.it?' on':''}" onclick="toggleLang('it')"></button></div>
   </div>`;
   // Import
-  h+=`<div class="set-section"><div class="set-sec-title">Importer une leçon</div>
-    <button class="set-btn" onclick="document.getElementById('fimp').click()" style="margin-top:8px;">📥 Importer fichier .txt / .json</button>
-    <input type="file" id="fimp" accept=".txt,.json" style="display:none" onchange="importLesson(event)">
+  h+=`<div class="set-section"><div class="set-sec-title">Importer des leçons</div>
+    <button class="set-btn" onclick="document.getElementById('fimp').click()" style="margin-top:8px;">📥 Importer fichier(s) .json / .txt</button>
+    <input type="file" id="fimp" accept=".txt,.json" style="display:none" multiple onchange="importLesson(event)">
     <div style="padding:0 13px 11px;font-size:11px;color:var(--text3);line-height:1.6;">
-      Le fichier doit être un JSON valide avec un champ "id". Vous pouvez importer n'importe quelle leçon, même hors sommaire.
+      <strong style="color:var(--text2);">3 formats acceptés :</strong><br>
+      • <strong>Leçon unique</strong> — JSON avec un champ <code>"id"</code><br>
+      • <strong>Bundle (multi-leçons)</strong> — tableau JSON <code>[{...}, {...}]</code><br>
+      • <strong>Sélection multiple</strong> — sélectionnez plusieurs fichiers d'un coup (Ctrl+clic / Cmd+clic)
     </div>
   </div>`;
   // Leçons importées
@@ -1329,17 +1332,46 @@ function toggleLang(code){
   renderLangBar();renderSettings();
 }
 function importLesson(e){
-  const file=e.target.files[0];if(!file)return;
-  const r=new FileReader();
-  r.onload=ev=>{try{
-    const json=JSON.parse(ev.target.result);
-    if(!json.id)throw new Error('"id" manquant');
-    const l=gl();const idx=l.findIndex(x=>x.id===json.id);
-    if(idx>=0)l[idx]=json;else l.push(json);sl(l);
-    renderSettings();renderList();
-    toast(`✅ "${json.titre||json.id}" importée`);
-  }catch(err){toast('❌ '+err.message);}};
-  r.readAsText(file);e.target.value='';
+  const files=[...e.target.files];
+  if(!files.length)return;
+  let total=0,errors=[];
+  let remaining=files.length;
+
+  files.forEach(file=>{
+    const r=new FileReader();
+    r.onload=ev=>{
+      try{
+        const json=JSON.parse(ev.target.result);
+        // Detect format: array (bundle) or single object
+        const lessons=Array.isArray(json)?json:[json];
+        const l=gl();
+        let imported=0;
+        lessons.forEach(lesson=>{
+          if(!lesson.id){errors.push(`"id" manquant dans un élément`);return;}
+          const idx=l.findIndex(x=>x.id===lesson.id);
+          if(idx>=0)l[idx]=lesson;else l.push(lesson);
+          imported++;
+        });
+        sl(l);
+        total+=imported;
+      }catch(err){
+        errors.push(`${file.name} : ${err.message}`);
+      }
+      remaining--;
+      if(remaining===0){
+        // All files processed
+        renderSettings();renderList();
+        if(errors.length){
+          toast(`⚠️ ${total} leçon(s) importée(s), ${errors.length} erreur(s)`);
+          console.error('Import errors:',errors);
+        }else{
+          toast(`✅ ${total} leçon(s) importée(s)`);
+        }
+      }
+    };
+    r.readAsText(file);
+  });
+  e.target.value='';
 }
 function deleteLesson(id){
   if(!confirm('Supprimer cette leçon ?'))return;
